@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>assignment2</title>
+<link href="style.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet">
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css' type='text/css' />
+</head>
+<body>
+    <div>
+        <div class = "text">
+            <h2>City of Melbourne Building footprints</h2>
+            <h3>Below is an interactive map showing information of different types of building footprints. </h3>
+            Hover on the buildings for brief information, click for details.<br>
+            Click the legends can show/hide cooreponding layer.<br>
+            The 'initial position' button can take you back to the starting position.<br>
+        </div>
+        <!-- map shown here -->
+        <div id="map">
+            <!-- title -->
+            <div class = "map-overlay" id = "title"><h2>2020 building footprints</h2></div>
+            <!-- legend -->
+            <div class="map-overlay" id="fp_legend"></div>
+            <!-- nav elements -->
+            <nav id="buttons"></nav>
+            <!-- a button flyTo initial position -->
+            <a href="#" class = "map-overlay" id = 'init_button'> <span style = "font-size: 20px;">&#9873</span> Initial position </a>        
+        </div>
+
+        <div class = "text" id = "text_3d">
+            <h3>Below is the 3D view of structures in the above map</h3>
+        </div>
+
+        <div id = "map_3d">
+            <!-- title -->
+            <div class = "map-overlay" id = "title"><h2>2020 building footprints 3D view</h2></div>
+            <!-- nav elements -->
+            <nav id="buttons"></nav>
+            <!-- a button flyTo initial position -->
+        </div>
+
+        <div class="text" id="text_dashboard">
+            <h3>Below is a tableau dashboard that provides a wider view</h3>
+        </div>
+
+        <!-- tableau public generated code -->
+        <div class='tableauPlaceholder' id='viz1632031889165' style="margin-top: 60px;">
+            <noscript>
+                <a href='#'>
+                    <img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;as&#47;assignment2_16320314942090&#47;Dashboard1&#47;1_rss.png' style='border: none' />
+                </a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='assignment2_16320314942090&#47;Dashboard1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;as&#47;assignment2_16320314942090&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='zh-CN' /><param name='filter' value='publish=yes' /></object>
+        </div>                
+        <script type='text/javascript'>
+            var divElement = document.getElementById('viz1632031889165');                    
+            var vizElement = divElement.getElementsByTagName('object')[0];                    
+            if ( divElement.offsetWidth > 800 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.width='100%';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='1227px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                
+        </script>
+
+    </div>
+    
+
+ 
+</body>
+</html>
+
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYnVkZDAwIiwiYSI6ImNrdDNubnB3ZTAzczAybnA0bmwwY2FmM2EifQ.ewQXfHTuV5WAE50QTj57Yg';
+    var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v11',
+    center: [144.941, -37.818],
+    zoom: 15.5
+    });
+
+
+    map.on('load', e => {
+    // create legends	
+    let fp_layers = [{
+        "name": "Structure",
+        "color": "#7570b3"
+        },
+        {
+        "name": "Bridge",
+        "color": "#1b9e77"
+        },
+        {
+        "name": "Toilet",
+        "color": "#d95f02"
+        },
+        {
+        "name": "Tram shop",
+        "color": "#e7298a"
+        },
+        {
+        "name": "Train platform",
+        "color": "#66a61e"
+        },
+        {
+        "name": "Jetties",
+        "color": "#e6ab02"
+        },
+        {
+        "name": "Ramp",
+        "color": "#a6761d"
+        }
+        
+    ];
+    let legend = document.querySelector('#fp_legend');
+
+    // fly to initial position
+    let init_button = document.querySelector('#init_button');
+    init_button.onclick = e =>{
+        map.flyTo({
+            center: [144.941, -37.818],
+            zoom: 15.5
+        });
+    };
+
+    //add layers
+    for (let layer of fp_layers) {
+
+        map.addLayer({
+            "id": layer.name,
+            "type": "fill",
+            "source": {
+                "type": "vector",
+                "url": "mapbox://budd00.6gx8wxpa"
+            },
+            "source-layer": "2020_Building_Footprints-1cqb49",
+            "paint": {
+                "fill-color": layer.color,
+                "fill-outline-color": "#919191"
+            },
+            "filter": ["==", "footprint_type", layer.name]
+        });
+
+
+
+        // create clickable legend
+        let item = document.createElement('a');
+        item.href = '#';
+
+        item.classList.add('active');
+        item.dataset.layerName = layer.name;
+        item.textContent = layer.name;
+        item.style.backgroundColor = layer.color;
+        legend.appendChild(item);
+
+        //add click effect
+        item.onclick = e => {
+            let clickedLayer = e.target.dataset.layerName;
+            
+            e.preventDefault();
+            e.stopPropagation();
+
+            let visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+
+            if (visibility !== 'none') {
+                map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                e.target.classList.remove('active');
+                item.style.backgroundColor = 'white';
+            } else {
+                e.target.classList.add('active');
+                map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                item.style.backgroundColor = layer.color;
+            }
+        };
+
+
+        //setup a basic popup
+        let popup = new mapboxgl.Popup({
+                closeButton: false,
+                closeOnClick: false
+            });
+
+        // popups are shown when hover above a building
+        map.on('mouseenter', layer.name, (e)=>{
+            // change the cursor UI
+            // map.getCanvas().style.cursor = 'pointer';
+            // set content in popup
+            let content = 
+                '<p><span id = \'fp_type\'>Footprint type: '+e.features[0].properties.footprint_type+'</span><br>'
+                +'<span>tiers:'+e.features[0].properties.tier+'</span><br>'
+                +'<span>Roof type: '+e.features[0].properties.roof_type+'</span><br>'
+                +'<span>(Click for more info)</span>'
+                +'</p>';
+
+            //make the popup move along cursor
+            popup.trackPointer().setHTML(content).addTo(map);
+        });
+
+        // mouse leave
+        map.on('mouseleave', layer.name,(e)=>{
+            popup.remove();
+            // map.getCanvas().style.cursor = '';
+        });
+
+
+        map.on('click',layer.name, (e) => {
+            /* Determine if a feature in the "locations" layer exists at that point. */
+            // const features = e.features;
+            /* If it does not exist, return */
+            if (!e.features.length) return;
+            
+            // detailed info
+            let content = 
+                '<p><span id = \'fp_type\'>Footprint type: '+e.features[0].properties.footprint_type+'</span><br>'
+                +'<span>structure elevations: '+e.features[0].properties.structure_max_elevation+' (max) '+e.features[0].properties.structure_min_elevation+' (min)</span><br>'
+                +'<span>property id: '+e.features[0].properties.property_id+'</span><br>'
+                +'<span>structure id: '+e.features[0].properties.structure_id+'</span><br>'
+                +'<span>extrusion: '+e.features[0].properties.structure_extrusion+'</span><br>'
+                +'<span>tiers:'+e.features[0].properties.tier+'</span><br>'
+                +'<span>Roof type: '+e.features[0].properties.roof_type+'</span>'
+                +'</p>';
+
+            //setup a basic popup
+            let detail_popup = new mapboxgl.Popup({
+                closeButton: false,
+            });
+
+            /* Close all other popups and display popup for clicked store */
+            detail_popup.setLngLat(e.lngLat).setHTML(content).addTo(map);
+            /* Fly to the point */
+            map.flyTo({
+                center: e.lngLat,
+                zoom: 16
+            });
+            popup.remove();
+        });
+
+
+    }
+
+
+
+
+    // 3D map
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYnVkZDAwIiwiYSI6ImNrdDNubnB3ZTAzczAybnA0bmwwY2FmM2EifQ.ewQXfHTuV5WAE50QTj57Yg';
+    const map_3d = new mapboxgl.Map({
+    style: 'mapbox://styles/mapbox/light-v10',
+    center: [144.941, -37.818],
+    zoom: 15.5,
+    pitch: 45,
+    bearing: -17.6,
+    container: 'map_3d',
+    antialias: true
+    });
+    
+    map_3d.on('load', () => {
+    // Insert the layer beneath any symbol layer.
+    const layers = map_3d.getStyle().layers;
+    const labelLayerId = layers.find(
+    (layer) => layer.type === 'symbol' && layer.layout['text-field']
+    ).id;
+    
+    map_3d.addLayer(
+    {
+    'id': 'add-3d-buildings',
+    'source': 'composite',
+    'source-layer': 'building',
+    'filter': ['==', 'extrude', 'true'],
+    'type': 'fill-extrusion',
+    'minzoom': 12,
+    'paint': {
+    'fill-extrusion-color': '#aaa',
+    
+    // Use an 'interpolate' expression to
+    // add a smooth transition effect to
+    // the buildings as the user zooms in.
+    'fill-extrusion-height': [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    15,
+    0,
+    15.05,
+    ['get', 'height']
+    ],
+    'fill-extrusion-base': [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    15,
+    0,
+    15.05,
+    ['get', 'min_height']
+    ],
+    'fill-extrusion-opacity': 0.6
+    }
+    },
+    labelLayerId
+    );
+
+        
+});
+
+    // add geocoder and nav control
+    map.addControl(new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl,
+    collapsed: true
+    }));
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.ScaleControl());
+    map.addControl(new mapboxgl.FullscreenControl());
+
+        // add geocoder and nav control
+    map_3d.addControl(new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl,
+    collapsed: true
+    }));
+    map_3d.addControl(new mapboxgl.NavigationControl());
+    map_3d.addControl(new mapboxgl.ScaleControl());
+    map_3d.addControl(new mapboxgl.FullscreenControl());
+});
+
+
+
+
+
+
+
+
+    
+</script>
